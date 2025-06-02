@@ -248,6 +248,8 @@ Para problemas o consultas sobre el backend:
 2. Verifica la configuración de la base de datos
 3. Consulta la documentación de Django REST Framework
 
+
+
 ---
 
 **Desarrollado con ❤️ usando Django REST Framework**

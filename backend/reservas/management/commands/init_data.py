@@ -84,7 +84,7 @@ class Command(BaseCommand):
                         'estado': 'DISPONIBLE'
                     }
                 )
-                if created and i < 3:  # Solo mostrar las primeras 3 por tipo
+                if created and i < 3:
                     self.stdout.write(f"  📍 Habitación {numero} creada")
                 contador += 1
         
@@ -143,10 +143,10 @@ class Command(BaseCommand):
             if created:
                 self.stdout.write(f"✅ Huésped '{huesped.nombre_completo}' creado")
         
-        # 5. Crear algunas reservaciones de ejemplo
+        # 5. Crear algunas reservaciones de ejemplo - CORREGIDO
         hoy = date.today()
         huespedes = list(Huesped.objects.all())
-        habitaciones = list(Habitacion.objects.all()[:8])  # Solo las primeras 8
+        habitaciones = list(Habitacion.objects.all()[:8])
         
         reservaciones_ejemplo = [
             {
@@ -170,30 +170,33 @@ class Command(BaseCommand):
             {
                 'huesped': huespedes[2],
                 'habitacion': habitaciones[2],
-                'fecha_llegada': hoy - timedelta(days=2),
-                'fecha_salida': hoy + timedelta(days=1),
+                'fecha_llegada': hoy + timedelta(days=5),
+                'fecha_salida': hoy + timedelta(days=8),
                 'precio': Decimal('270.00'),
-                'estado': 'EN_CURSO',
+                'estado': 'CONFIRMADA',
                 'metodo_pago': 'TRANSFERENCIA'
             },
             {
                 'huesped': huespedes[3],
                 'habitacion': habitaciones[3],
-                'fecha_llegada': hoy - timedelta(days=10),
-                'fecha_salida': hoy - timedelta(days=7),
+                'fecha_llegada': hoy + timedelta(days=10),
+                'fecha_salida': hoy + timedelta(days=13),
                 'precio': Decimal('150.00'),
-                'estado': 'COMPLETADA',
+                'estado': 'PENDIENTE',
                 'metodo_pago': 'TARJETA'
             }
         ]
         
         for reserva_data in reservaciones_ejemplo:
-            if not Reservacion.objects.filter(
-                huesped=reserva_data['huesped'],
-                habitacion=reserva_data['habitacion']
-            ).exists():
-                reserva = Reservacion.objects.create(**reserva_data)
-                self.stdout.write(f"✅ Reservación {reserva.numero_confirmacion} creada")
+            try:
+                if not Reservacion.objects.filter(
+                    huesped=reserva_data['huesped'],
+                    habitacion=reserva_data['habitacion']
+                ).exists():
+                    reserva = Reservacion.objects.create(**reserva_data)
+                    self.stdout.write(f"✅ Reservación {reserva.numero_confirmacion} creada")
+            except Exception as e:
+                self.stdout.write(f"⚠️ Error creando reservación: {e}")
         
         # Resumen final
         self.stdout.write("\n" + "="*50)
