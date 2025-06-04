@@ -1,0 +1,85 @@
+<div class="layout-container">
+  <app-navbar></app-navbar>
+  
+  <div class="main-content">
+    <app-sidebar></app-sidebar>
+    
+    <div class="content-area">
+      <div class="page-header">
+        <h1>{{isEdit ? 'Editar' : 'Crear'}} Habitación</h1>
+        <button mat-stroked-button routerLink="/habitaciones">
+          <mat-icon>arrow_back</mat-icon>
+          Volver a Lista
+        </button>
+      </div>
+
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Información de la Habitación</mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <form [formGroup]="habitacionForm" (ngSubmit)="onSubmit()">
+            <div class="form-row">
+              <mat-form-field class="form-field">
+                <mat-label>Número de Habitación</mat-label>
+                <input matInput formControlName="numero_habitacion" placeholder="Ej: 101">
+                <mat-error *ngIf="habitacionForm.get('numero_habitacion')?.hasError('required')">
+                  El número de habitación es requerido
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field class="form-field">
+                <mat-label>Tipo de Habitación</mat-label>
+                <mat-select formControlName="tipo_habitacion">
+                  <mat-option *ngFor="let tipo of tiposHabitacion" [value]="tipo.id">
+                    {{tipo.nombre}} - {{tipo.capacidad_personas}} personas
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="habitacionForm.get('tipo_habitacion')?.hasError('required')">
+                  El tipo de habitación es requerido
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field class="form-field">
+                <mat-label>Estado</mat-label>
+                <mat-select formControlName="estado">
+                  <mat-option value="disponible">Disponible</mat-option>
+                  <mat-option value="ocupada">Ocupada</mat-option>
+                  <mat-option value="mantenimiento">Mantenimiento</mat-option>
+                  <mat-option value="limpieza">Limpieza</mat-option>
+                </mat-select>
+                <mat-error *ngIf="habitacionForm.get('estado')?.hasError('required')">
+                  El estado es requerido
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field class="form-field">
+                <mat-label>¿Disponible para reserva?</mat-label>
+                <mat-select formControlName="disponible">
+                  <mat-option [value]="true">Sí</mat-option>
+                  <mat-option [value]="false">No</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <mat-form-field class="form-field full-width">
+              <mat-label>Descripción</mat-label>
+              <textarea matInput formControlName="descripcion" rows="4" placeholder="Descripción de la habitación"></textarea>
+            </mat-form-field>
+
+            <div class="form-actions">
+              <button mat-button type="button" routerLink="/habitaciones">Cancelar</button>
+              <button mat-raised-button color="primary" type="submit" [disabled]="habitacionForm.invalid || loading">
+                <mat-icon *ngIf="loading">hourglass_empty</mat-icon>
+                {{loading ? 'Guardando...' : (isEdit ? 'Actualizar' : 'Crear') + ' Habitación'}}
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

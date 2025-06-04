@@ -1,0 +1,137 @@
+<div class="layout-container">
+  <app-sidebar></app-sidebar>
+  
+  <div class="main-content">
+    <app-navbar></app-navbar>
+    
+    <div class="content">
+      <mat-card class="list-card">
+        <mat-card-header>
+          <mat-card-title>Lista de Habitaciones</mat-card-title>
+          <div class="header-actions">
+            <button mat-raised-button color="primary" routerLink="/habitaciones/crear">
+              <mat-icon>add</mat-icon>
+              Nueva Habitación
+            </button>
+          </div>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div *ngIf="loading; else contentTable" class="loading-container">
+            <mat-spinner></mat-spinner>
+            <p>Cargando habitaciones...</p>
+          </div>
+
+          <ng-template #contentTable>
+            <div class="table-container">
+              <table mat-table [dataSource]="habitaciones" class="mat-elevation-8">
+                
+                <!-- Número Column -->
+                <ng-container matColumnDef="numero">
+                  <th mat-header-cell *matHeaderCellDef>Número</th>
+                  <td mat-cell *matCellDef="let habitacion">
+                    <div class="room-number">
+                      <strong>{{habitacion.numero}}</strong>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <!-- Tipo Column -->
+                <ng-container matColumnDef="tipo">
+                  <th mat-header-cell *matHeaderCellDef>Tipo</th>
+                  <td mat-cell *matCellDef="let habitacion">
+                    <div class="room-type">
+                      {{getTipoLabel(habitacion.tipo)}}
+                    </div>
+                  </td>
+                </ng-container>
+
+                <!-- Capacidad Column -->
+                <ng-container matColumnDef="capacidad">
+                  <th mat-header-cell *matHeaderCellDef>Capacidad</th>
+                  <td mat-cell *matCellDef="let habitacion">
+                    <div class="capacity-info">
+                      <mat-icon>person</mat-icon>
+                      {{habitacion.capacidad}} personas
+                    </div>
+                  </td>
+                </ng-container>
+
+                <!-- Precio Column -->
+                <ng-container matColumnDef="precio">
+                  <th mat-header-cell *matHeaderCellDef>Precio/Noche</th>
+                  <td mat-cell *matCellDef="let habitacion">
+                    <div class="price-info">
+                      <strong>${{habitacion.precio_por_noche | number:'1.2-2'}}</strong>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <!-- Estado Column -->
+                <ng-container matColumnDef="estado">
+                  <th mat-header-cell *matHeaderCellDef>Estado</th>
+                  <td mat-cell *matCellDef="let habitacion">
+                    <mat-chip 
+                      [ngClass]="getEstadoClass(habitacion.estado)"
+                      class="status-chip">
+                      {{getEstadoLabel(habitacion.estado)}}
+                    </mat-chip>
+                  </td>
+                </ng-container>
+
+                <!-- Disponible Column -->
+                <ng-container matColumnDef="disponible">
+                  <th mat-header-cell *matHeaderCellDef>Disponible</th>
+                  <td mat-cell *matCellDef="let habitacion">
+                    <mat-chip 
+                      [ngClass]="habitacion.disponible ? 'disponible' : 'no-disponible'"
+                      class="availability-chip">
+                      {{habitacion.disponible ? 'Sí' : 'No'}}
+                    </mat-chip>
+                  </td>
+                </ng-container>
+
+                <!-- Acciones Column -->
+                <ng-container matColumnDef="acciones">
+                  <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                  <td mat-cell *matCellDef="let habitacion" class="actions-cell">
+                    <button mat-icon-button 
+                            [routerLink]="['/habitaciones', habitacion.id]"
+                            matTooltip="Ver detalles">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                    <button mat-icon-button 
+                            [routerLink]="['/habitaciones', habitacion.id, 'editar']"
+                            matTooltip="Editar"
+                            color="primary">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button 
+                            (click)="toggleDisponibilidad(habitacion.id, habitacion.disponible)"
+                            [matTooltip]="habitacion.disponible ? 'Deshabilitar' : 'Habilitar'"
+                            [color]="habitacion.disponible ? 'warn' : 'accent'">
+                      <mat-icon>{{habitacion.disponible ? 'block' : 'check_circle'}}</mat-icon>
+                    </button>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+              </table>
+            </div>
+
+            <div *ngIf="habitaciones.length === 0" class="no-data">
+              <mat-icon>hotel</mat-icon>
+              <h3>No hay habitaciones registradas</h3>
+              <p>Comienza creando tu primera habitación</p>
+              <button mat-raised-button color="primary" routerLink="/habitaciones/crear">
+                <mat-icon>add</mat-icon>
+                Crear Habitación
+              </button>
+            </div>
+          </ng-template>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

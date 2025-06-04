@@ -1,0 +1,215 @@
+/* Layout */
+.layout-container {
+  display: flex;
+  height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  flex: 1;
+  padding: 20px;
+  background-color: #f5f5f5;
+  overflow-y: auto;
+}
+
+/* Card */
+.list-card {
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.list-card mat-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* Loading */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  gap: 20px;
+}
+
+.loading-container p {
+  color: #666;
+  font-size: 16px;
+}
+
+/* Table */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  min-width: 700px;
+}
+
+.mat-mdc-header-cell {
+  font-weight: 600;
+  color: #333;
+}
+
+.mat-mdc-cell {
+  padding: 16px 8px;
+}
+
+/* Room Number */
+.room-number {
+  font-size: 18px;
+  color: #1976d2;
+}
+
+/* Room Type */
+.room-type {
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+/* Capacity Info */
+.capacity-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.capacity-info mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: #666;
+}
+
+/* Price Info */
+.price-info {
+  text-align: right;
+}
+
+.price-info strong {
+  color: #2e7d32;
+  font-size: 16px;
+}
+
+/* Status Chips */
+.status-chip {
+  min-height: 24px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-chip.disponible {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+}
+
+.status-chip.ocupada {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.status-chip.mantenimiento {
+  background-color: #fff3e0;
+  color: #f57c00;
+}
+
+.status-chip.limpieza {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+/* Availability Chips */
+.availability-chip {
+  min-height: 24px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.availability-chip.disponible {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+}
+
+.availability-chip.no-disponible {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+/* Actions */
+.actions-cell {
+  text-align: center;
+}
+
+.actions-cell button {
+  margin: 0 4px;
+}
+
+/* No Data */
+.no-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  text-align: center;
+  color: #666;
+}
+
+.no-data mat-icon {
+  font-size: 64px;
+  height: 64px;
+  width: 64px;
+  margin-bottom: 20px;
+  color: #ccc;
+}
+
+.no-data h3 {
+  margin: 10px 0;
+  color: #333;
+}
+
+.no-data p {
+  margin-bottom: 20px;
+  color: #666;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .content {
+    padding: 10px;
+  }
+  
+  .header-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .list-card mat-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  table {
+    font-size: 14px;
+  }
+  
+  .mat-mdc-cell {
+    padding: 12px 4px;
+  }
+}
