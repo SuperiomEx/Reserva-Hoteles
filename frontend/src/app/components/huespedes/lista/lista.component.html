@@ -1,0 +1,77 @@
+<div class="layout-container">
+  <app-navbar></app-navbar>
+  
+  <div class="main-content">
+    <app-sidebar></app-sidebar>
+    
+    <div class="content-area">
+      <div class="page-header">
+        <h1>Gestión de Huéspedes</h1>
+        <button mat-raised-button color="primary" routerLink="/huespedes/nuevo">
+          <mat-icon>add</mat-icon>
+          Nuevo Huésped
+        </button>
+      </div>
+
+      <mat-card class="table-card">
+        <mat-card-header>
+          <mat-card-title>Lista de Huéspedes</mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div *ngIf="loading" class="loading-container">
+            <mat-spinner></mat-spinner>
+            <p>Cargando huéspedes...</p>
+          </div>
+
+          <div *ngIf="!loading">
+            <mat-table [dataSource]="huespedes" class="huespedes-table">
+              <ng-container matColumnDef="nombre_completo">
+                <mat-header-cell *matHeaderCellDef>Nombre Completo</mat-header-cell>
+                <mat-cell *matCellDef="let huesped">{{huesped.nombre_completo}}</mat-cell>
+              </ng-container>
+
+              <ng-container matColumnDef="numero_identidad">
+                <mat-header-cell *matHeaderCellDef>Identidad</mat-header-cell>
+                <mat-cell *matCellDef="let huesped">{{huesped.numero_identidad}}</mat-cell>
+              </ng-container>
+
+              <ng-container matColumnDef="correo_electronico">
+                <mat-header-cell *matHeaderCellDef>Email</mat-header-cell>
+                <mat-cell *matCellDef="let huesped">{{huesped.correo_electronico}}</mat-cell>
+              </ng-container>
+
+              <ng-container matColumnDef="numero_contacto">
+                <mat-header-cell *matHeaderCellDef>Teléfono</mat-header-cell>
+                <mat-cell *matCellDef="let huesped">{{huesped.numero_contacto}}</mat-cell>
+              </ng-container>
+
+              <ng-container matColumnDef="acciones">
+                <mat-header-cell *matHeaderCellDef>Acciones</mat-header-cell>
+                <mat-cell *matCellDef="let huesped">
+                  <button mat-icon-button color="primary" (click)="editarHuesped(huesped)" matTooltip="Editar">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button color="warn" (click)="eliminarHuesped(huesped)" matTooltip="Eliminar">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </mat-cell>
+              </ng-container>
+
+              <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+              <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+            </mat-table>
+
+            <div *ngIf="huespedes.length === 0" class="no-data">
+              <mat-icon>people_outline</mat-icon>
+              <p>No hay huéspedes registrados</p>
+              <button mat-raised-button color="primary" routerLink="/huespedes/nuevo">
+                Crear primer huésped
+              </button>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>
