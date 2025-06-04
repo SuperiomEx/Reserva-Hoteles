@@ -1,0 +1,168 @@
+<div class="dashboard-container">
+  <app-navbar></app-navbar>
+  
+  <div class="main-content">
+    <app-sidebar></app-sidebar>
+    
+    <div class="content-area">
+      <div class="dashboard-header">
+        <h1>Dashboard</h1>
+        <button mat-raised-button color="primary" (click)="downloadReport()">
+          <mat-icon>download</mat-icon>
+          Descargar Reporte
+        </button>
+      </div>
+
+      <div *ngIf="loading" class="loading-container">
+        <mat-spinner></mat-spinner>
+        <p>Cargando datos...</p>
+      </div>
+
+      <div *ngIf="!loading && dashboardData" class="dashboard-content">
+        <!-- Tarjetas de estadísticas -->
+        <mat-grid-list cols="4" rowHeight="120px" gutterSize="16px" class="stats-grid">
+          <mat-grid-tile>
+            <mat-card class="stat-card">
+              <mat-card-content>
+                <div class="stat-content">
+                  <mat-icon class="stat-icon total">hotel</mat-icon>
+                  <div class="stat-text">
+                    <h3>{{ dashboardData.reservaciones }}</h3>
+                    <p>Total Reservaciones</p>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </mat-grid-tile>
+
+          <mat-grid-tile>
+            <mat-card class="stat-card">
+              <mat-card-content>
+                <div class="stat-content">
+                  <mat-icon class="stat-icon active">event_available</mat-icon>
+                  <div class="stat-text">
+                    <h3>{{ dashboardData.reservaciones_activas }}</h3>
+                    <p>Reservaciones Activas</p>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </mat-grid-tile>
+
+          <mat-grid-tile>
+            <mat-card class="stat-card">
+              <mat-card-content>
+                <div class="stat-content">
+                  <mat-icon class="stat-icon available">meeting_room</mat-icon>
+                  <div class="stat-text">
+                    <h3>{{ dashboardData.habitaciones_disponibles }}</h3>
+                    <p>Habitaciones Disponibles</p>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </mat-grid-tile>
+
+          <mat-grid-tile>
+            <mat-card class="stat-card">
+              <mat-card-content>
+                <div class="stat-content">
+                  <mat-icon class="stat-icon revenue">attach_money</mat-icon>
+                  <div class="stat-text">
+                    <h3>{{ formatCurrency(dashboardData.ingresos.mes_actual) }}</h3>
+                    <p>Ingresos del Mes</p>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </mat-grid-tile>
+        </mat-grid-list>
+
+        <!-- Gráfico de ocupación -->
+        <mat-card class="occupancy-card">
+          <mat-card-header>
+            <mat-card-title>Ocupación Promedio</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="occupancy-display">
+              <div class="occupancy-circle">
+                <span class="occupancy-percentage">{{ dashboardData.ocupacion_promedio }}%</span>
+              </div>
+              <p class="occupancy-text">Ocupación del hotel</p>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Reservaciones recientes -->
+        <mat-card class="recent-reservations">
+          <mat-card-header>
+            <mat-card-title>Reservaciones Recientes</mat-card-title>
+            <mat-card-subtitle>Últimas reservaciones registradas</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div *ngIf="dashboardData.reservaciones_recientes.length === 0" class="no-data">
+              <mat-icon>info</mat-icon>
+              <p>No hay reservaciones recientes</p>
+            </div>
+            
+            <table mat-table [dataSource]="dashboardData.reservaciones_recientes" *ngIf="dashboardData.reservaciones_recientes.length > 0">
+              <!-- ID Column -->
+              <ng-container matColumnDef="id">
+                <th mat-header-cell *matHeaderCellDef>ID</th>
+                <td mat-cell *matCellDef="let reservacion">#{{ reservacion.id }}</td>
+              </ng-container>
+
+              <!-- Huésped Column -->
+              <ng-container matColumnDef="huesped">
+                <th mat-header-cell *matHeaderCellDef>Huésped</th>
+                <td mat-cell *matCellDef="let reservacion">
+                  {{ reservacion.huesped_detalle?.nombre }} {{ reservacion.huesped_detalle?.apellido }}
+                </td>
+              </ng-container>
+
+              <!-- Habitación Column -->
+              <ng-container matColumnDef="habitacion">
+                <th mat-header-cell *matHeaderCellDef>Habitación</th>
+                <td mat-cell *matCellDef="let reservacion">
+                  {{ reservacion.habitacion_detalle?.numero }}
+                </td>
+              </ng-container>
+
+              <!-- Fechas Column -->
+              <ng-container matColumnDef="fechas">
+                <th mat-header-cell *matHeaderCellDef>Fechas</th>
+                <td mat-cell *matCellDef="let reservacion">
+                  {{ formatDate(reservacion.fecha_checkin) }} - {{ formatDate(reservacion.fecha_checkout) }}
+                </td>
+              </ng-container>
+
+              <!-- Estado Column -->
+              <ng-container matColumnDef="estado">
+                <th mat-header-cell *matHeaderCellDef>Estado</th>
+                <td mat-cell *matCellDef="let reservacion">
+                  <span class="estado-badge" [ngClass]="getEstadoClass(reservacion.estado)">
+                    {{ reservacion.estado | titlecase }}
+                  </span>
+                </td>
+              </ng-container>
+
+              <!-- Total Column -->
+              <ng-container matColumnDef="total">
+                <th mat-header-cell *matHeaderCellDef>Total</th>
+                <td mat-cell *matCellDef="let reservacion">
+                  {{ formatCurrency(reservacion.precio_total) }}
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+          </mat-card-content>
+          <mat-card-actions align="end">
+            <a mat-button routerLink="/reservaciones" color="primary">Ver todas las reservaciones</a>
+          </mat-card-actions>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+</div>
