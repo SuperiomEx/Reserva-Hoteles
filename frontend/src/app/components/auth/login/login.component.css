@@ -1,0 +1,100 @@
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+}
+
+.login-title {
+  text-align: center;
+  color: #333;
+  font-size: 1.5rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.login-icon {
+  font-size: 2rem;
+  color: #667eea;
+}
+
+mat-card-subtitle {
+  text-align: center;
+  color: #666;
+  margin-top: 8px;
+}
+
+.login-form {
+  margin-top: 20px;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.login-button {
+  height: 48px;
+  font-size: 16px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+}
+
+.button-spinner {
+  margin-right: 8px;
+}
+
+.register-link {
+  text-align: center;
+  margin: 16px 0 0 0;
+  color: #666;
+}
+
+.register-link a {
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.is-invalid {
+  border-color: #f44336 !important;
+}
+
+mat-form-field {
+  margin-bottom: 16px;
+}
+
+mat-error {
+  font-size: 12px;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .login-container {
+    padding: 10px;
+  }
+  
+  .login-card {
+    padding: 16px;
+  }
+  
+  .login-title {
+    font-size: 1.3rem;
+  }
+}
