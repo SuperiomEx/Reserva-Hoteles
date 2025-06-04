@@ -254,14 +254,17 @@ class RegisterView(APIView):
         token, created = Token.objects.get_or_create(user=user)
         
         return Response({
+            'access': token.key,
+            'refresh': token.key,  # Para compatibilidad
             'user': {
                 'id': user.id,
                 'username': user.username,
                 'email': user.email,
                 'first_name': user.first_name,
-                'last_name': user.last_name
-            },
-            'token': token.key
+                'last_name': user.last_name,
+                'is_active': user.is_active,
+                'date_joined': user.date_joined.isoformat()
+            }
         }, status=status.HTTP_201_CREATED)
 
 class UserProfileView(APIView):
@@ -382,8 +385,7 @@ class ExportReservacionesPDFView(APIView):
         elements.append(Spacer(1, 20))
         
         # Datos de la tabla
-        data = [['Confirmación', 'Huésped', 'Habitación', 'Llegada', 'Salida', 'Precio', 'Estado']
-        ]
+        data = [['Confirmación', 'Huésped', 'Habitación', 'Llegada', 'Salida', 'Precio', 'Estado']]
         
         for reserva in reservaciones:
             data.append([
@@ -424,83 +426,20 @@ class ExportReservacionesPDFView(APIView):
         # Construir PDF
         doc.build(elements)
         buffer.seek(0)
-          # Respuesta HTTP
+        
+        # Respuesta HTTP mejorada para Chrome
         response = HttpResponse(buffer.read(), content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename="reservaciones_activas_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
+        
+        # Headers adicionales para Chrome
+        filename = f"reservaciones_activas_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        response['Content-Length'] = len(buffer.getvalue())
+        response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response['Pragma'] = 'no-cache'
+        response['Expires'] = '0'
+        response['X-Content-Type-Options'] = 'nosniff'
         
         return response
-
-    @action(detail=False, methods=['get'])
-    def export_activas_excel(self, request):
-        """Exportar reservaciones activas en formato Excel"""
-        from openpyxl import Workbook
-        from openpyxl.styles import Font, PatternFill, Alignment
-        from openpyxl.utils import get_column_letter
-        
-        # Crear workbook
-        wb = Workbook()
-        ws = wb.active
-        ws.title = "Reservaciones Activas"
-        
-        # Estilos
-        header_font = Font(bold=True, color="FFFFFF")
-        header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
-        center_alignment = Alignment(horizontal="center")
-        
-        # Encabezados
-        headers = [
-            'Número Confirmación', 'Huésped', 'Habitación', 'Fecha Llegada', 
-            'Fecha Salida', 'Precio', 'Estado', 'Método Pago'
-        ]
-        
-        for col_num, header in enumerate(headers, 1):
-            cell = ws.cell(row=1, column=col_num, value=header)
-            cell.font = header_font
-            cell.fill = header_fill
-            cell.alignment = center_alignment
-        
-        # Datos
-        reservaciones = Reservacion.objects.filter(
-            estado__in=['PENDIENTE', 'CONFIRMADA', 'EN_CURSO']
-        ).select_related('huesped', 'habitacion')
-        
-        for row_num, reserva in enumerate(reservaciones, 2):
-            ws.cell(row=row_num, column=1, value=reserva.numero_confirmacion)
-            ws.cell(row=row_num, column=2, value=reserva.huesped.nombre_completo)
-            ws.cell(row=row_num, column=3, value=reserva.habitacion.numero_habitacion)
-            ws.cell(row=row_num, column=4, value=reserva.fecha_llegada)
-            ws.cell(row=row_num, column=5, value=reserva.fecha_salida)
-            ws.cell(row=row_num, column=6, value=float(reserva.precio))
-            ws.cell(row=row_num, column=7, value=reserva.get_estado_display())
-            ws.cell(row=row_num, column=8, value=reserva.get_metodo_pago_display() if reserva.metodo_pago else '')
-        
-        # Ajustar ancho de columnas
-        for column in ws.columns:
-            max_length = 0
-            column_letter = get_column_letter(column[0].column)
-            for cell in column:
-                try:
-                    if len(str(cell.value)) > max_length:
-                        max_length = len(str(cell.value))
-                except:
-                    pass
-            adjusted_width = min(max_length + 2, 50)
-            ws.column_dimensions[column_letter].width = adjusted_width
-        
-        # Guardar en memoria
-        output = BytesIO()
-        wb.save(output)
-        output.seek(0)
-        
-        # Respuesta HTTP
-        response = HttpResponse(
-            output.read(),
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        )
-        response['Content-Disposition'] = f'attachment; filename="reservaciones_activas_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx"'
-        
-        return response
-
 
 # Vista separada para exportar Excel
 class ExportReservacionesExcelView(APIView):

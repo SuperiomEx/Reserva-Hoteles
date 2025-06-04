@@ -20,8 +20,8 @@ urlpatterns = [
     path('auth/register/', RegisterView.as_view(), name='api_register'),
     path('auth/profile/', UserProfileView.as_view(), name='api_profile'),
     
-    # Endpoints adicionales para reportes
+    # Reportes y exportaciones
+    path('reportes/dashboard/', views.DashboardStatsView.as_view(), name='dashboard_stats'),
     path('reportes/reservaciones-activas-pdf/', views.ExportReservacionesPDFView.as_view(), name='export_reservaciones_pdf'),
     path('reportes/reservaciones-activas-excel/', ExportReservacionesExcelView.as_view(), name='export_reservaciones_excel'),
-    path('reportes/dashboard/', views.DashboardStatsView.as_view(), name='dashboard_stats'),
 ]
