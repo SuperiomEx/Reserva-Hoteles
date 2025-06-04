@@ -1,0 +1,139 @@
+<div class="layout-container">
+  <app-sidebar></app-sidebar>
+  
+  <div class="main-content">
+    <app-navbar></app-navbar>
+    
+    <div class="content">
+      <!-- Report Configuration -->
+      <mat-card class="config-card">
+        <mat-card-header>
+          <mat-card-title>Configuración de Reportes</mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div class="config-form">
+            <!-- Report Type -->
+            <mat-form-field class="form-field">
+              <mat-label>Tipo de Reporte</mat-label>
+              <mat-select [(value)]="selectedReportType">
+                <mat-option *ngFor="let type of reportTypes" [value]="type.value">
+                  {{type.label}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <!-- Date Range -->
+            <div class="date-range">
+              <mat-form-field class="form-field">
+                <mat-label>Fecha Inicio</mat-label>
+                <input matInput [matDatepicker]="startPicker" [(ngModel)]="fechaInicio">
+                <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+                <mat-datepicker #startPicker></mat-datepicker>
+              </mat-form-field>
+
+              <mat-form-field class="form-field">
+                <mat-label>Fecha Fin</mat-label>
+                <input matInput [matDatepicker]="endPicker" [(ngModel)]="fechaFin">
+                <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+                <mat-datepicker #endPicker></mat-datepicker>
+              </mat-form-field>
+            </div>
+
+            <!-- Actions -->
+            <div class="actions">
+              <button mat-raised-button color="primary" 
+                      (click)="generateReport()" 
+                      [disabled]="loading">
+                <mat-icon>analytics</mat-icon>
+                Generar Reporte
+              </button>
+              
+              <button mat-raised-button color="accent" 
+                      (click)="exportToPDF()" 
+                      [disabled]="loading || !reportData">
+                <mat-icon>picture_as_pdf</mat-icon>
+                Exportar PDF
+              </button>
+              
+              <button mat-raised-button color="accent" 
+                      (click)="exportToExcel()" 
+                      [disabled]="loading || !reportData">
+                <mat-icon>table_chart</mat-icon>
+                Exportar Excel
+              </button>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Report Results -->
+      <mat-card class="results-card" *ngIf="reportData || loading">
+        <mat-card-header>
+          <mat-card-title>{{reportData?.title || 'Generando Reporte...'}}</mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div *ngIf="loading" class="loading-container">
+            <mat-spinner></mat-spinner>
+            <p>Generando reporte...</p>
+          </div>
+
+          <div *ngIf="reportData && !loading" class="report-content">
+            <!-- Metrics Grid -->
+            <div class="metrics-grid">
+              <div *ngFor="let metric of reportData.metrics" class="metric-card">
+                <div class="metric-value">{{metric.value}}</div>
+                <div class="metric-label">{{metric.label}}</div>
+              </div>
+            </div>
+
+            <!-- Summary Information -->
+            <div class="summary-section">
+              <h3>Resumen del Período</h3>
+              <div class="summary-info">
+                <div class="info-item">
+                  <strong>Fecha de Inicio:</strong> {{fechaInicio | date:'dd/MM/yyyy'}}
+                </div>
+                <div class="info-item">
+                  <strong>Fecha de Fin:</strong> {{fechaFin | date:'dd/MM/yyyy'}}
+                </div>
+                <div class="info-item">
+                  <strong>Tipo de Reporte:</strong> {{selectedReportTypeLabel}}
+                </div>
+                <div class="info-item">
+                  <strong>Generado el:</strong> {{currentDate | date:'dd/MM/yyyy HH:mm'}}
+                </div>
+              </div>
+            </div>
+
+            <!-- Chart Placeholder -->
+            <div class="chart-section">
+              <h3>Análisis Gráfico</h3>
+              <div class="chart-placeholder">
+                <mat-icon>bar_chart</mat-icon>
+                <p>Visualización de datos próximamente</p>
+                <small>Los gráficos estarán disponibles en futuras versiones</small>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- No Report Generated -->
+      <mat-card class="no-report-card" *ngIf="!reportData && !loading">
+        <mat-card-content>
+          <div class="no-report">
+            <mat-icon>assessment</mat-icon>
+            <h3>Generar Reporte</h3>
+            <p>Selecciona el tipo de reporte y el rango de fechas para comenzar</p>
+            <button mat-raised-button color="primary" (click)="generateReport()">
+              <mat-icon>play_arrow</mat-icon>
+              Generar Primer Reporte
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>
