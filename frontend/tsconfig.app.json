@@ -4,16 +4,25 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/app",
-    "types": [
-      "node"
-    ]
+    "types": []    // Angular CLI deja esto vacío para la app de navegador
   },
   "files": [
-    "src/main.ts",
-    "src/main.server.ts",
-    "src/server.ts"
+    "src/main.ts",       // punto de entrada de la aplicación en navegador
+    "src/polyfills.ts"   // 
   ],
   "include": [
-    "src/**/*.d.ts"
-  ]
+    "src/**/*.d.ts",     // declaraciones globales
+    "src/**/*.ts",       // TODOS los .ts de la app
+    "src/**/*.html"      // plantillas Angular (para que strictTemplates funcione)
+  ],
+  "exclude": [
+    "src/test.ts",       // archivo de test puntal (se usa en tsconfig.spec.json)
+    "src/**/*.spec.ts",  // tests unitarios
+    "**/*.test.ts"
+  ],
+
+  "angularCompilerOptions": {
+    "strictTemplates": true
+  }
+
 }
