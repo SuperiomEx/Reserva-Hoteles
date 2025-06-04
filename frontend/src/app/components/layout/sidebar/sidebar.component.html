@@ -1,0 +1,45 @@
+<div class="sidebar">
+  <div class="sidebar-content">
+    <mat-nav-list class="nav-list">
+      <div class="menu-section">
+        <h3 class="menu-title">NAVEGACIÓN</h3>
+        
+        <a mat-list-item 
+           *ngFor="let item of menuItems"
+           [routerLink]="item.route"
+           routerLinkActive="active"
+           [routerLinkActiveOptions]="{exact: item.route === '/dashboard'}"
+           class="nav-item">
+          <mat-icon matListItemIcon class="nav-icon">{{ item.icon }}</mat-icon>
+          <span matListItemTitle class="nav-text">{{ item.name }}</span>
+        </a>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="menu-section">
+        <h3 class="menu-title">ACCIONES RÁPIDAS</h3>
+        
+        <a mat-list-item routerLink="/reservaciones/nueva" class="nav-item quick-action">
+          <mat-icon matListItemIcon class="nav-icon">add</mat-icon>
+          <span matListItemTitle class="nav-text">Nueva Reservación</span>
+        </a>
+        
+        <a mat-list-item routerLink="/huespedes/nuevo" class="nav-item quick-action">
+          <mat-icon matListItemIcon class="nav-icon">person_add</mat-icon>
+          <span matListItemTitle class="nav-text">Nuevo Huésped</span>
+        </a>
+      </div>
+    </mat-nav-list>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="app-info">
+      <mat-icon class="footer-icon">hotel</mat-icon>
+      <div class="footer-text">
+        <p class="app-name">Hotel PID</p>
+        <p class="app-version">v1.0.0</p>
+      </div>
+    </div>
+  </div>
+</div>

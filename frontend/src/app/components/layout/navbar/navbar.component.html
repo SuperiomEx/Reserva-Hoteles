@@ -1,0 +1,52 @@
+<mat-toolbar color="primary" class="navbar">
+  <div class="navbar-content">
+    <!-- Logo y título -->
+    <div class="navbar-left">
+      <mat-icon class="app-icon">hotel</mat-icon>
+      <span class="app-title">Sistema de Gestión Hotelera</span>
+    </div>
+
+    <!-- Acciones de usuario -->
+    <div class="navbar-right">
+      <!-- Notificaciones -->
+      <button mat-icon-button class="notification-button">
+        <mat-icon matBadge="3" matBadgeColor="warn">notifications</mat-icon>
+      </button>
+
+      <!-- Menú de usuario -->
+      <button mat-button [matMenuTriggerFor]="userMenu" class="user-menu-trigger">
+        <div class="user-avatar">
+          {{ getUserInitials() }}
+        </div>
+        <span class="user-name">{{ getUserDisplayName() }}</span>
+        <mat-icon>keyboard_arrow_down</mat-icon>
+      </button>
+
+      <mat-menu #userMenu="matMenu" class="user-menu">
+        <div class="user-info">
+          <div class="user-avatar large">
+            {{ getUserInitials() }}
+          </div>
+          <div class="user-details">
+            <p class="user-display-name">{{ getUserDisplayName() }}</p>
+            <p class="user-email">{{ currentUser?.email }}</p>
+          </div>
+        </div>
+        <mat-divider></mat-divider>
+        <button mat-menu-item (click)="navigateToProfile()">
+          <mat-icon>person</mat-icon>
+          <span>Mi Perfil</span>
+        </button>
+        <button mat-menu-item (click)="navigateToSettings()">
+          <mat-icon>settings</mat-icon>
+          <span>Configuración</span>
+        </button>
+        <mat-divider></mat-divider>
+        <button mat-menu-item (click)="logout()" class="logout-item">
+          <mat-icon>logout</mat-icon>
+          <span>Cerrar Sesión</span>
+        </button>
+      </mat-menu>
+    </div>
+  </div>
+</mat-toolbar>
