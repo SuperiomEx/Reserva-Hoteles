@@ -1,0 +1,217 @@
+/* Layout */
+.layout-container {
+  display: flex;
+  height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  flex: 1;
+  padding: 20px;
+  background-color: #f5f5f5;
+  overflow-y: auto;
+}
+
+/* Card */
+.list-card {
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.list-card mat-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* Loading */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  gap: 20px;
+}
+
+.loading-container p {
+  color: #666;
+  font-size: 16px;
+}
+
+/* Table */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  min-width: 800px;
+}
+
+.mat-mdc-header-cell {
+  font-weight: 600;
+  color: #333;
+}
+
+.mat-mdc-cell {
+  padding: 16px 8px;
+}
+
+/* Guest Info */
+.guest-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.guest-name {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.guest-email {
+  font-size: 12px;
+  color: #666;
+}
+
+/* Room Info */
+.room-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.room-number {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.room-type {
+  font-size: 12px;
+  color: #666;
+  text-transform: capitalize;
+}
+
+/* Date Info */
+.date-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.date-info small {
+  color: #666;
+  font-size: 11px;
+}
+
+/* Status Chips */
+.status-chip {
+  min-height: 24px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-chip.confirmada {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+}
+
+.status-chip.pendiente {
+  background-color: #fff3e0;
+  color: #f57c00;
+}
+
+.status-chip.cancelada {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.status-chip.completada {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+/* Price Info */
+.price-info {
+  text-align: right;
+}
+
+.price-info strong {
+  color: #2e7d32;
+  font-size: 16px;
+}
+
+/* Actions */
+.actions-cell {
+  text-align: center;
+}
+
+.actions-cell button {
+  margin: 0 4px;
+}
+
+/* No Data */
+.no-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  text-align: center;
+  color: #666;
+}
+
+.no-data mat-icon {
+  font-size: 64px;
+  height: 64px;
+  width: 64px;
+  margin-bottom: 20px;
+  color: #ccc;
+}
+
+.no-data h3 {
+  margin: 10px 0;
+  color: #333;
+}
+
+.no-data p {
+  margin-bottom: 20px;
+  color: #666;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .content {
+    padding: 10px;
+  }
+  
+  .header-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .list-card mat-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  table {
+    font-size: 14px;
+  }
+  
+  .mat-mdc-cell {
+    padding: 12px 4px;
+  }
+}

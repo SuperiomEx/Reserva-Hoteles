@@ -1,0 +1,112 @@
+<div class="layout-container">
+  <app-navbar></app-navbar>
+  
+  <div class="main-content">
+    <app-sidebar></app-sidebar>
+    
+    <div class="content-area">
+      <div class="page-header">
+        <h1>Crear Nueva Reservación</h1>
+        <button mat-stroked-button routerLink="/reservaciones">
+          <mat-icon>arrow_back</mat-icon>
+          Volver a Lista
+        </button>
+      </div>
+
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Información de la Reservación</mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <form [formGroup]="reservacionForm" (ngSubmit)="onSubmit()">
+            <div class="form-row">
+              <mat-form-field class="form-field">
+                <mat-label>Huésped</mat-label>
+                <mat-select formControlName="huesped">
+                  <mat-option *ngFor="let huesped of huespedes" [value]="huesped.id">
+                    {{huesped.nombres}} {{huesped.apellidos}}
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="reservacionForm.get('huesped')?.hasError('required')">
+                  El huésped es requerido
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field class="form-field">
+                <mat-label>Habitación</mat-label>
+                <mat-select formControlName="habitacion">
+                  <mat-option *ngFor="let habitacion of habitacionesDisponibles" [value]="habitacion.id">
+                    {{habitacion.numero_habitacion}} - {{habitacion.tipo_habitacion_nombre}}
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="reservacionForm.get('habitacion')?.hasError('required')">
+                  La habitación es requerida
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field class="form-field">
+                <mat-label>Fecha de Llegada</mat-label>
+                <input matInput [matDatepicker]="llegadaPicker" formControlName="fecha_llegada">
+                <mat-datepicker-toggle matIconSuffix [for]="llegadaPicker"></mat-datepicker-toggle>
+                <mat-datepicker #llegadaPicker></mat-datepicker>
+                <mat-error *ngIf="reservacionForm.get('fecha_llegada')?.hasError('required')">
+                  La fecha de llegada es requerida
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field class="form-field">
+                <mat-label>Fecha de Salida</mat-label>
+                <input matInput [matDatepicker]="salidaPicker" formControlName="fecha_salida">
+                <mat-datepicker-toggle matIconSuffix [for]="salidaPicker"></mat-datepicker-toggle>
+                <mat-datepicker #salidaPicker></mat-datepicker>
+                <mat-error *ngIf="reservacionForm.get('fecha_salida')?.hasError('required')">
+                  La fecha de salida es requerida
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field class="form-field">
+                <mat-label>Precio Total</mat-label>
+                <input matInput type="number" formControlName="precio" placeholder="0.00">
+                <span matTextPrefix>$</span>
+                <mat-error *ngIf="reservacionForm.get('precio')?.hasError('required')">
+                  El precio es requerido
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field class="form-field">
+                <mat-label>Método de Pago</mat-label>
+                <mat-select formControlName="metodo_pago">
+                  <mat-option value="efectivo">Efectivo</mat-option>
+                  <mat-option value="tarjeta_credito">Tarjeta de Crédito</mat-option>
+                  <mat-option value="tarjeta_debito">Tarjeta de Débito</mat-option>
+                  <mat-option value="transferencia">Transferencia</mat-option>
+                </mat-select>
+                <mat-error *ngIf="reservacionForm.get('metodo_pago')?.hasError('required')">
+                  El método de pago es requerido
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <mat-form-field class="form-field full-width">
+              <mat-label>Observaciones</mat-label>
+              <textarea matInput formControlName="observaciones" rows="4"></textarea>
+            </mat-form-field>
+
+            <div class="form-actions">
+              <button mat-button type="button" routerLink="/reservaciones">Cancelar</button>
+              <button mat-raised-button color="primary" type="submit" [disabled]="reservacionForm.invalid || loading">
+                <mat-icon *ngIf="loading">hourglass_empty</mat-icon>
+                {{loading ? 'Guardando...' : 'Crear Reservación'}}
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

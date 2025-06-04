@@ -1,0 +1,137 @@
+<div class="layout-container">
+  <app-sidebar></app-sidebar>
+  
+  <div class="main-content">
+    <app-navbar></app-navbar>
+    
+    <div class="content">
+      <mat-card class="list-card">
+        <mat-card-header>
+          <mat-card-title>Lista de Reservaciones</mat-card-title>
+          <div class="header-actions">
+            <button mat-raised-button color="primary" routerLink="/reservaciones/crear">
+              <mat-icon>add</mat-icon>
+              Nueva Reservación
+            </button>
+          </div>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div *ngIf="loading; else contentTable" class="loading-container">
+            <mat-spinner></mat-spinner>
+            <p>Cargando reservaciones...</p>
+          </div>
+
+          <ng-template #contentTable>
+            <div class="table-container">
+              <table mat-table [dataSource]="reservaciones" class="mat-elevation-8">
+                
+                <!-- Número de Confirmación Column -->
+                <ng-container matColumnDef="numero_confirmacion">
+                  <th mat-header-cell *matHeaderCellDef>Confirmación</th>
+                  <td mat-cell *matCellDef="let reservacion">
+                    <strong>{{reservacion.numero_confirmacion}}</strong>
+                  </td>
+                </ng-container>
+
+                <!-- Huésped Column -->
+                <ng-container matColumnDef="huesped">
+                  <th mat-header-cell *matHeaderCellDef>Huésped</th>
+                  <td mat-cell *matCellDef="let reservacion">
+                    <div class="guest-info">
+                      <div class="guest-name">{{reservacion.huesped.nombre}} {{reservacion.huesped.apellidos}}</div>
+                      <div class="guest-email">{{reservacion.huesped.email}}</div>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <!-- Habitación Column -->
+                <ng-container matColumnDef="habitacion">
+                  <th mat-header-cell *matHeaderCellDef>Habitación</th>
+                  <td mat-cell *matCellDef="let reservacion">
+                    <div class="room-info">
+                      <div class="room-number">{{reservacion.habitacion.numero}}</div>
+                      <div class="room-type">{{reservacion.habitacion.tipo}}</div>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <!-- Fechas Column -->
+                <ng-container matColumnDef="fechas">
+                  <th mat-header-cell *matHeaderCellDef>Fechas</th>
+                  <td mat-cell *matCellDef="let reservacion">
+                    <div class="date-info">
+                      <div>{{reservacion.fecha_entrada | date:'dd/MM/yyyy'}}</div>
+                      <div>{{reservacion.fecha_salida | date:'dd/MM/yyyy'}}</div>
+                      <small>{{getDays(reservacion.fecha_entrada, reservacion.fecha_salida)}} noches</small>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <!-- Estado Column -->
+                <ng-container matColumnDef="estado">
+                  <th mat-header-cell *matHeaderCellDef>Estado</th>
+                  <td mat-cell *matCellDef="let reservacion">
+                    <mat-chip 
+                      [ngClass]="getEstadoClass(reservacion.estado)"
+                      class="status-chip">
+                      {{getEstadoLabel(reservacion.estado)}}
+                    </mat-chip>
+                  </td>
+                </ng-container>
+
+                <!-- Precio Column -->
+                <ng-container matColumnDef="precio">
+                  <th mat-header-cell *matHeaderCellDef>Precio Total</th>
+                  <td mat-cell *matCellDef="let reservacion">
+                    <div class="price-info">
+                      <strong>${{reservacion.precio_total | number:'1.2-2'}}</strong>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <!-- Acciones Column -->
+                <ng-container matColumnDef="acciones">
+                  <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                  <td mat-cell *matCellDef="let reservacion" class="actions-cell">
+                    <button mat-icon-button 
+                            [routerLink]="['/reservaciones', reservacion.id]"
+                            matTooltip="Ver detalles">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                    <button mat-icon-button 
+                            [routerLink]="['/reservaciones', reservacion.id, 'editar']"
+                            matTooltip="Editar"
+                            color="primary">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button 
+                            (click)="cancelarReservacion(reservacion.id)"
+                            matTooltip="Cancelar reservación"
+                            color="warn"
+                            [disabled]="reservacion.estado === 'cancelada'">
+                      <mat-icon>cancel</mat-icon>
+                    </button>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+              </table>
+            </div>
+
+            <div *ngIf="reservaciones.length === 0" class="no-data">
+              <mat-icon>event_busy</mat-icon>
+              <h3>No hay reservaciones registradas</h3>
+              <p>Comienza creando tu primera reservación</p>
+              <button mat-raised-button color="primary" routerLink="/reservaciones/crear">
+                <mat-icon>add</mat-icon>
+                Crear Reservación
+              </button>
+            </div>
+          </ng-template>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>
