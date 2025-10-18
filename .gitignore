@@ -1,0 +1,60 @@
+# ====================================
+# ⚙️ General Node.js
+# ====================================
+node_modules/
+dist/
+build/
+coverage/
+.tmp/
+.temp/
+*.log
+*.tsbuildinfo
+tokens.txt
+# ====================================
+# ⚙️ Lock files
+# (Cada proyecto maneja su propio lock)
+# ====================================
+backend/package-lock.json
+frontend/pnpm-lock.yaml
+
+# ====================================
+# 🧩 Environment y tokens
+# ====================================
+.env
+.env.*
+tokens/
+
+# ====================================
+# 💻 IDEs y sistema operativo
+# ====================================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ====================================
+# 🚀 Frameworks
+# Astro
+frontend/.astro/
+frontend/.cache/
+frontend/.output/
+frontend/.vercel/
+
+# NestJS
+backend/.nestjs/
+backend/dist/
+
+# ====================================
+# 🧪 Tests y coverage
+# ====================================
+coverage/
+*.spec.*
+*.test.*
+
+# ====================================
+# 📦 Archivos temporales o comprimidos
+# ====================================
+*.zip
+*.rar
+*.7z
+*.tar
