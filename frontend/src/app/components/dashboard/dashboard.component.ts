@@ -47,15 +47,47 @@ export class DashboardComponent implements OnInit {
     this.loading = true;
     this.dashboardService.getStats().subscribe({
       next: (data: DashboardData) => {
-        this.dashboardData = data;
+        // Asegurar que reservaciones_recientes siempre sea un array
+        this.dashboardData = {
+          ...data,
+          reservaciones_recientes: data.reservaciones_recientes || [],
+          habitaciones: data.habitaciones || { total: 0, disponibles: 0, ocupadas: 0, porcentaje_ocupacion: 0 },
+          huespedes: data.huespedes || { total_activos: 0 },
+          reservaciones: data.reservaciones || { activas: 0, check_ins_hoy: 0, check_outs_hoy: 0 },
+          ingresos: data.ingresos || { mes_actual: 0 },
+          ocupacion_por_tipo: data.ocupacion_por_tipo || []
+        };
         this.loading = false;
+        console.log('✅ Dashboard data cargada:', this.dashboardData);
       },
       error: (error: any) => {
         this.loading = false;
-        console.error('Error al cargar datos del dashboard:', error);
+        console.error('❌ Error al cargar datos del dashboard:', error);
+        // Inicializar con datos vacíos en caso de error
+        this.dashboardData = {
+          habitaciones: {
+            total: 0,
+            disponibles: 0,
+            ocupadas: 0,
+            porcentaje_ocupacion: 0
+          },
+          huespedes: {
+            total_activos: 0
+          },
+          reservaciones: {
+            activas: 0,
+            check_ins_hoy: 0,
+            check_outs_hoy: 0
+          },
+          ingresos: {
+            mes_actual: 0
+          },
+          ocupacion_por_tipo: [],
+          reservaciones_recientes: []
+        };
       }
     });
-  }  downloadReport(): void {
+  }downloadReport(): void {
     this.dashboardService.exportPDF().subscribe({
       next: (blob: Blob) => {
         const url = window.URL.createObjectURL(blob);
@@ -72,6 +104,8 @@ export class DashboardComponent implements OnInit {
   }
 
   getEstadoClass(estado: string): string {
+    if (!estado) return 'estado-pendiente';
+    
     switch (estado.toLowerCase()) {
       case 'confirmada':
         return 'estado-confirmada';
@@ -87,13 +121,19 @@ export class DashboardComponent implements OnInit {
   }
 
   formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString('es-ES');
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
   }
 
-  formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('es-ES', {
+  formatCurrency(amount: number | undefined): string {
+    if (!amount) return '$0';
+    return new Intl.NumberFormat('es-MX', {
       style: 'currency',
-      currency: 'EUR'
+      currency: 'USD'
     }).format(amount);
   }
 }
