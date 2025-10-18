@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Habitacion } from '../models/reservacion';
 import { TipoHabitacion } from '../models/tipo-habitacion';
 import { environment } from '../../environments/environment';
@@ -46,10 +47,22 @@ export class HabitacionService {
   getDisponibles(): Observable<Habitacion[]> {
     return this.http.get<Habitacion[]>(`${this.API_URL}/disponibles/`);
   }
-
   // CRUD Tipos de Habitación
   getTipos(): Observable<TipoHabitacion[]> {
-    return this.http.get<any>(`${this.TIPOS_URL}/`);
+    return this.http.get<any>(`${this.TIPOS_URL}/`).pipe(
+      map((response: any) => {
+        // Si la respuesta tiene 'results', es paginada
+        if (response && response.results) {
+          return response.results;
+        }
+        // Si es un array directo
+        if (Array.isArray(response)) {
+          return response;
+        }
+        // Si es un objeto, retornar array vacío
+        return [];
+      })
+    );
   }
 
   getTipoById(id: number): Observable<TipoHabitacion> {
