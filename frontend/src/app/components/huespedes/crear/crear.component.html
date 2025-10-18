@@ -1,1 +1,145 @@
-<p>crear works!</p>
+<div class="layout-container">
+    <app-navbar></app-navbar>
+
+    <div class="main-content">
+        <app-sidebar></app-sidebar>
+
+        <div class="content-area">
+            <div class="page-header">
+                <h1>Nuevo Huésped</h1>
+                <button mat-button routerLink="/huespedes">
+                    <mat-icon>arrow_back</mat-icon>
+                    Volver a la lista
+                </button>
+            </div>
+
+            <mat-card class="form-card">
+                <mat-card-header>
+                    <mat-card-title>Información del Huésped</mat-card-title>
+                    <mat-card-subtitle>Complete los datos del nuevo huésped</mat-card-subtitle>
+                </mat-card-header>
+
+                <mat-card-content>
+                    <div class="form-container">
+                        <!-- Diagnóstico temporal -->
+                        <mat-card class="debug-card"
+                            style="margin-bottom: 20px; background: #fff3cd; border-left: 4px solid #ffc107;">
+                            <mat-card-content>
+                                <h4 style="margin: 0 0 10px 0;">🔍 Diagnóstico de Autenticación</h4>
+                                <button mat-raised-button color="accent" (click)="checkAuth()"
+                                    style="margin-right: 10px;">
+                                    Verificar Token
+                                </button>
+                                <button mat-raised-button (click)="testConnection()">
+                                    Probar Conexión Backend
+                                </button>
+                            </mat-card-content>
+                        </mat-card>
+                    </div>
+
+                    <form [formGroup]="huespedForm" (ngSubmit)="onSubmit()">
+                        <div class="form-grid">
+                            <!-- Nombres -->
+                            <mat-form-field appearance="outline" class="full-width">
+                                <mat-label>Nombres</mat-label>
+                                <input matInput formControlName="nombres" placeholder="Ej: Juan Carlos">
+                                <mat-icon matPrefix>person</mat-icon>
+                                <mat-error *ngIf="huespedForm.get('nombres')?.hasError('required')">
+                                    Los nombres son requeridos
+                                </mat-error>
+                            </mat-form-field>
+
+                            <!-- Apellidos -->
+                            <mat-form-field appearance="outline" class="full-width">
+                                <mat-label>Apellidos</mat-label>
+                                <input matInput formControlName="apellidos" placeholder="Ej: García López">
+                                <mat-icon matPrefix>person</mat-icon>
+                                <mat-error *ngIf="huespedForm.get('apellidos')?.hasError('required')">
+                                    Los apellidos son requeridos
+                                </mat-error>
+                            </mat-form-field>
+
+                            <!-- Número de Identidad -->
+                            <mat-form-field appearance="outline">
+                                <mat-label>Número de Identidad</mat-label>
+                                <input matInput formControlName="numero_identidad" placeholder="Ej: 12345678A">
+                                <mat-icon matPrefix>badge</mat-icon>
+                                <mat-error *ngIf="huespedForm.get('numero_identidad')?.hasError('required')">
+                                    El número de identidad es requerido
+                                </mat-error>
+                            </mat-form-field>
+
+                            <!-- Sexo -->
+                            <mat-form-field appearance="outline">
+                                <mat-label>Sexo</mat-label>
+                                <mat-select formControlName="sexo">
+                                    <mat-option value="M">Masculino</mat-option>
+                                    <mat-option value="F">Femenino</mat-option>
+                                    <mat-option value="O">Otro</mat-option>
+                                </mat-select>
+                                <mat-icon matPrefix>wc</mat-icon>
+                                <mat-error *ngIf="huespedForm.get('sexo')?.hasError('required')">
+                                    El sexo es requerido
+                                </mat-error>
+                            </mat-form-field>
+
+                            <!-- Fecha de Nacimiento -->
+                            <mat-form-field appearance="outline">
+                                <mat-label>Fecha de Nacimiento</mat-label>
+                                <input matInput [matDatepicker]="picker" formControlName="fecha_nacimiento">
+                                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                                <mat-datepicker #picker></mat-datepicker>
+                                <mat-icon matPrefix>cake</mat-icon>
+                            </mat-form-field>
+
+                            <!-- Nacionalidad -->
+                            <mat-form-field appearance="outline">
+                                <mat-label>Nacionalidad</mat-label>
+                                <input matInput formControlName="nacionalidad" placeholder="Ej: Española">
+                                <mat-icon matPrefix>flag</mat-icon>
+                                <mat-error *ngIf="huespedForm.get('nacionalidad')?.hasError('required')">
+                                    La nacionalidad es requerida
+                                </mat-error>
+                            </mat-form-field>
+
+                            <!-- Correo Electrónico -->
+                            <mat-form-field appearance="outline" class="full-width">
+                                <mat-label>Correo Electrónico</mat-label>
+                                <input matInput type="email" formControlName="correo_electronico"
+                                    placeholder="Ej: juan@example.com">
+                                <mat-icon matPrefix>email</mat-icon>
+                                <mat-error *ngIf="huespedForm.get('correo_electronico')?.hasError('required')">
+                                    El correo electrónico es requerido
+                                </mat-error>
+                                <mat-error *ngIf="huespedForm.get('correo_electronico')?.hasError('email')">
+                                    Ingrese un correo válido
+                                </mat-error>
+                            </mat-form-field>
+
+                            <!-- Número de Contacto -->
+                            <mat-form-field appearance="outline" class="full-width">
+                                <mat-label>Número de Contacto</mat-label>
+                                <input matInput formControlName="numero_contacto" placeholder="Ej: +34 600 000 000">
+                                <mat-icon matPrefix>phone</mat-icon>
+                                <mat-error *ngIf="huespedForm.get('numero_contacto')?.hasError('required')">
+                                    El número de contacto es requerido
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="form-actions">
+                            <button mat-button type="button" routerLink="/huespedes" [disabled]="loading">
+                                Cancelar
+                            </button>
+                            <button mat-raised-button color="primary" type="submit"
+                                [disabled]="loading || !huespedForm.valid">
+                                <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+                                <span *ngIf="!loading">Guardar Huésped</span>
+                            </button>
+                        </div>
+                    </form>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+</div>
