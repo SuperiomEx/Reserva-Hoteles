@@ -111,37 +111,26 @@
 }
 
 .occupancy-circle {
-  width: 120px;
-  height: 120px;
+  width: 200px;
+  height: 200px;
   border-radius: 50%;
-  background: conic-gradient(#4CAF50 0% var(--occupancy-percentage, 0%), #e0e0e0 var(--occupancy-percentage, 0%) 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   margin-bottom: 16px;
 }
 
-.occupancy-circle::before {
-  content: '';
-  position: absolute;
-  width: 80px;
-  height: 80px;
-  background: white;
-  border-radius: 50%;
-}
-
 .occupancy-percentage {
-  position: relative;
-  z-index: 1;
-  font-size: 1.5rem;
+  font-size: 3rem;
   font-weight: 600;
-  color: #333;
+  color: white;
 }
 
 .occupancy-text {
   color: #666;
-  margin: 0;
+  font-size: 1.125rem;
 }
 
 .recent-reservations {
@@ -201,6 +190,12 @@ table {
   color: #7B1FA2;
 }
 
+th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+  color: #333;
+}
+
 /* Responsive design */
 @media (max-width: 1200px) {
   .stats-grid {
@@ -229,5 +224,14 @@ table {
   
   .stat-content {
     justify-content: center;
+  }
+  
+  .occupancy-circle {
+    width: 150px;
+    height: 150px;
+  }
+
+  .occupancy-percentage {
+    font-size: 2rem;
   }
 }
