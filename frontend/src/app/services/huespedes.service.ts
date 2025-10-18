@@ -64,11 +64,10 @@ export class HuespedesService {
       params: params
     });
   }
-
   private getAuthHeaders(): HttpHeaders {
     const token = this.authService.getToken();
     return new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
+      'Authorization': `Token ${token}`,
       'Content-Type': 'application/json'
     });
   }

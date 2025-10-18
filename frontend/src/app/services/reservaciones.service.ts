@@ -73,11 +73,10 @@ export class ReservacionesService {
       headers: this.getAuthHeaders()
     });
   }
-
   private getAuthHeaders(): HttpHeaders {
     const token = this.authService.getToken();
     return new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
+      'Authorization': `Token ${token}`,
       'Content-Type': 'application/json'
     });
   }
