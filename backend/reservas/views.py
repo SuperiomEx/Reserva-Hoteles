@@ -514,3 +514,281 @@ class ExportReservacionesExcelView(APIView):
         response['Content-Disposition'] = f'attachment; filename="reservaciones_activas_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx"'
         
         return response
+
+class ReportesViewSet(APIView):
+    """Vista para generar reportes específicos"""
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        tipo_reporte = request.GET.get('tipo', 'ocupacion')
+        fecha_inicio = request.GET.get('fecha_inicio')
+        fecha_fin = request.GET.get('fecha_fin')
+        
+        if not fecha_inicio or not fecha_fin:
+            return Response({'error': 'Fechas requeridas'}, status=400)
+            
+        try:
+            fecha_inicio = datetime.strptime(fecha_inicio, '%Y-%m-%d').date()
+            fecha_fin = datetime.strptime(fecha_fin, '%Y-%m-%d').date()
+        except ValueError:
+            return Response({'error': 'Formato de fecha inválido'}, status=400)
+            
+        if tipo_reporte == 'ocupacion':
+            return self.reporte_ocupacion(fecha_inicio, fecha_fin)
+        elif tipo_reporte == 'ingresos':
+            return self.reporte_ingresos(fecha_inicio, fecha_fin)
+        elif tipo_reporte == 'huespedes':
+            return self.reporte_huespedes(fecha_inicio, fecha_fin)
+        elif tipo_reporte == 'habitaciones':
+            return self.reporte_habitaciones()
+        else:
+            return Response({'error': 'Tipo de reporte no válido'}, status=400)
+    
+    def reporte_ocupacion(self, fecha_inicio, fecha_fin):
+        """Reporte de ocupación hotelera"""
+        total_habitaciones = Habitacion.objects.count()
+        
+        # Reservaciones en el período
+        reservaciones_periodo = Reservacion.objects.filter(
+            fecha_llegada__gte=fecha_inicio,
+            fecha_salida__lte=fecha_fin,
+            estado__in=['CONFIRMADA', 'EN_CURSO', 'COMPLETADA']
+        )
+        
+        habitaciones_ocupadas = reservaciones_periodo.values('habitacion').distinct().count()
+        habitaciones_disponibles = total_habitaciones - habitaciones_ocupadas
+        tasa_ocupacion = (habitaciones_ocupadas / total_habitaciones * 100) if total_habitaciones > 0 else 0
+        
+        # Ocupación por tipo de habitación
+        ocupacion_por_tipo = TipoHabitacion.objects.annotate(
+            total_hab=Count('habitacion'),
+            ocupadas_periodo=Count(
+                'habitacion__reservacion',
+                filter=Q(
+                    habitacion__reservacion__fecha_llegada__gte=fecha_inicio,
+                    habitacion__reservacion__fecha_salida__lte=fecha_fin,
+                    habitacion__reservacion__estado__in=['CONFIRMADA', 'EN_CURSO', 'COMPLETADA']
+                )
+            )
+        ).values('nombre', 'total_hab', 'ocupadas_periodo')
+        
+        return Response({
+            'habitaciones_ocupadas': habitaciones_ocupadas,
+            'habitaciones_disponibles': habitaciones_disponibles,
+            'tasa_ocupacion': round(tasa_ocupacion, 2),
+            'total_habitaciones': total_habitaciones,
+            'ocupacion_por_tipo': list(ocupacion_por_tipo),
+            'periodo': {
+                'inicio': fecha_inicio,
+                'fin': fecha_fin
+            }
+        })
+    
+    def reporte_ingresos(self, fecha_inicio, fecha_fin):
+        """Reporte de ingresos del hotel"""
+        reservaciones_periodo = Reservacion.objects.filter(
+            fecha_llegada__gte=fecha_inicio,
+            fecha_salida__lte=fecha_fin,
+            estado__in=['CONFIRMADA', 'EN_CURSO', 'COMPLETADA']
+        )
+        
+        ingresos_periodo = reservaciones_periodo.aggregate(
+            total=Sum('precio')
+        )['total'] or 0
+        
+        reservaciones_confirmadas = reservaciones_periodo.count()
+        promedio_reservacion = (ingresos_periodo / reservaciones_confirmadas) if reservaciones_confirmadas > 0 else 0
+        
+        # Ingresos por tipo de habitación
+        ingresos_por_tipo = reservaciones_periodo.values(
+            'habitacion__tipo__nombre'
+        ).annotate(
+            total_ingresos=Sum('precio'),
+            cantidad_reservas=Count('id')
+        ).order_by('-total_ingresos')
+        
+        # Ingresos por mes
+        ingresos_mensuales = reservaciones_periodo.extra(
+            select={'mes': "DATE_TRUNC('month', fecha_llegada)"}
+        ).values('mes').annotate(
+            ingresos=Sum('precio'),
+            reservas=Count('id')
+        ).order_by('mes')
+        
+        return Response({
+            'ingresos_periodo': float(ingresos_periodo),
+            'reservaciones_confirmadas': reservaciones_confirmadas,
+            'promedio_reservacion': float(promedio_reservacion),
+            'ingresos_por_tipo': list(ingresos_por_tipo),
+            'ingresos_mensuales': list(ingresos_mensuales),
+            'periodo': {
+                'inicio': fecha_inicio,
+                'fin': fecha_fin
+            }
+        })
+    
+    def reporte_huespedes(self, fecha_inicio, fecha_fin):
+        """Reporte de huéspedes y actividad"""
+        # Huéspedes activos en el período
+        huespedes_periodo = Huesped.objects.filter(
+            reservacion__fecha_llegada__gte=fecha_inicio,
+            reservacion__fecha_salida__lte=fecha_fin
+        ).distinct()
+        
+        total_huespedes = huespedes_periodo.count()
+        
+        # Nuevos huéspedes (primera reserva en el período)
+        nuevos_huespedes = 0
+        for huesped in huespedes_periodo:
+            primera_reserva = huesped.reservacion_set.order_by('fecha_llegada').first()
+            if primera_reserva and primera_reserva.fecha_llegada >= fecha_inicio:
+                nuevos_huespedes += 1
+        
+        # Check-ins y check-outs del día actual
+        hoy = timezone.now().date()
+        checkins_hoy = Reservacion.objects.filter(
+            fecha_llegada=hoy,
+            estado__in=['PENDIENTE', 'CONFIRMADA']
+        ).count()
+        
+        checkouts_hoy = Reservacion.objects.filter(
+            fecha_salida=hoy,
+            estado='EN_CURSO'
+        ).count()
+        
+        # Huéspedes por nacionalidad/país (si tienes el campo)
+        huespedes_por_pais = huespedes_periodo.values(
+            'pais'
+        ).annotate(
+            cantidad=Count('id')
+        ).order_by('-cantidad')[:10]
+        
+        return Response({
+            'total_huespedes': total_huespedes,
+            'nuevos_huespedes': nuevos_huespedes,
+            'checkins_hoy': checkins_hoy,
+            'checkouts_hoy': checkouts_hoy,
+            'huespedes_por_pais': list(huespedes_por_pais),
+            'periodo': {
+                'inicio': fecha_inicio,
+                'fin': fecha_fin
+            }
+        })
+    
+    def reporte_habitaciones(self):
+        """Reporte del estado de las habitaciones"""
+        total_habitaciones = Habitacion.objects.count()
+        
+        # Estado actual de habitaciones
+        habitaciones_por_estado = Habitacion.objects.values(
+            'estado'
+        ).annotate(
+            cantidad=Count('id')
+        )
+        
+        # Habitaciones por tipo
+        habitaciones_por_tipo = TipoHabitacion.objects.annotate(
+            total_habitaciones=Count('habitacion'),
+            disponibles=Count('habitacion', filter=Q(habitacion__estado='DISPONIBLE')),
+            ocupadas=Count('habitacion', filter=Q(habitacion__estado='OCUPADA')),
+            mantenimiento=Count('habitacion', filter=Q(habitacion__estado='MANTENIMIENTO'))
+        ).values(
+            'nombre', 'total_habitaciones', 'disponibles', 'ocupadas', 'mantenimiento'
+        )
+        
+        return Response({
+            'total_habitaciones': total_habitaciones,
+            'habitaciones_disponibles': Habitacion.objects.filter(estado='DISPONIBLE').count(),
+            'habitaciones_mantenimiento': Habitacion.objects.filter(estado='MANTENIMIENTO').count(),
+            'habitaciones_limpieza': Habitacion.objects.filter(estado='LIMPIEZA').count(),
+            'habitaciones_por_estado': list(habitaciones_por_estado),
+            'habitaciones_por_tipo': list(habitaciones_por_tipo)
+        })
+
+class ExportReportsView(APIView):
+    """Vista para exportar reportes en PDF y Excel"""
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, format_type):
+        tipo_reporte = request.GET.get('tipo', 'ocupacion')
+        fecha_inicio = request.GET.get('fecha_inicio')
+        fecha_fin = request.GET.get('fecha_fin')
+        
+        if format_type == 'pdf':
+            return self.export_pdf(tipo_reporte, fecha_inicio, fecha_fin)
+        elif format_type == 'excel':
+            return self.export_excel(tipo_reporte, fecha_inicio, fecha_fin)
+        else:
+            return Response({'error': 'Formato no soportado'}, status=400)
+    
+    def export_pdf(self, tipo_reporte, fecha_inicio, fecha_fin):
+        """Exportar reporte en PDF"""
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=A4)
+        elements = []
+        styles = getSampleStyleSheet()
+        
+        # Título
+        title = Paragraph(f"Reporte de {tipo_reporte.title()}", styles['Title'])
+        elements.append(title)
+        elements.append(Spacer(1, 20))
+        
+        # Período
+        period = Paragraph(f"Período: {fecha_inicio} - {fecha_fin}", styles['Normal'])
+        elements.append(period)
+        elements.append(Spacer(1, 20))
+        
+        # Obtener datos del reporte
+        reportes_view = ReportesViewSet()
+        request_mock = type('Request', (), {
+            'GET': {'tipo': tipo_reporte, 'fecha_inicio': fecha_inicio, 'fecha_fin': fecha_fin}
+        })()
+        
+        response = reportes_view.get(request_mock)
+        data = response.data
+        
+        # Crear tabla con los datos
+        table_data = [['Métrica', 'Valor']]
+        for key, value in data.items():
+            if key != 'periodo':
+                table_data.append([key.replace('_', ' ').title(), str(value)])
+        
+        table = Table(table_data)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 14),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
+        
+        elements.append(table)
+        doc.build(elements)
+        
+        buffer.seek(0)
+        response = HttpResponse(buffer.getvalue(), content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="reporte_{tipo_reporte}_{fecha_inicio}_{fecha_fin}.pdf"'
+        
+        return response
+    
+    def export_excel(self, tipo_reporte, fecha_inicio, fecha_fin):
+        """Exportar reporte en Excel"""
+        # Aquí implementarías la exportación a Excel usando openpyxl
+        # Por simplicidad, retorno un CSV
+        
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="reporte_{tipo_reporte}_{fecha_inicio}_{fecha_fin}.csv"'
+        
+        writer = csv.writer(response)
+        writer.writerow(['Reporte', tipo_reporte.title()])
+        writer.writerow(['Período', f'{fecha_inicio} - {fecha_fin}'])
+        writer.writerow([])
+        writer.writerow(['Métrica', 'Valor'])
+        
+        # Obtener datos y escribir al CSV
+        # ... implementar lógica similar al PDF
+        
+        return response
