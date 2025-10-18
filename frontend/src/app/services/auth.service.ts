@@ -33,19 +33,36 @@ export class AuthService {
 
   private isBrowser(): boolean {
     return isPlatformBrowser(this.platformId);
-  }
-
-  login(credentials: LoginRequest): Observable<AuthResponse> {
+  }  login(credentials: LoginRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.API_URL}/auth/login/`, credentials)
       .pipe(
         tap(response => {
-          console.log('✅ Login response:', response); // DEBUG
+          console.log('✅ Login response:', response);
           
           if (this.isBrowser()) {
-            this.setTokens(response.access, response.refresh);
-            this.setUser(response.user);
+            // La API de Django devuelve { token: "..." } con TokenAuthentication
+            const token = (response as any).token || response.access;
+            console.log('🔑 Token recibido:', token ? `${token.substring(0, 20)}...` : 'NO TOKEN');
+            
+            if (token) {
+              // Guardar con la clave correcta que usa HuespedService
+              localStorage.setItem(this.TOKEN_KEY, token);
+              console.log('💾 Token guardado en localStorage con clave:', this.TOKEN_KEY);
+            } else {
+              console.error('❌ No se recibió token en la respuesta');
+            }
+            
+            // Si hay refresh token, guardarlo
+            if (response.refresh) {
+              localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refresh);
+            }
+            
+            // Guardar usuario si viene en la respuesta
+            if (response.user) {
+              this.setUser(response.user);
+              this.currentUserSubject.next(response.user);
+            }
           }
-          this.currentUserSubject.next(response.user);
         })
       );
   }
@@ -70,11 +87,16 @@ export class AuthService {
     }
     this.currentUserSubject.next(null);
     this.router.navigate(['/login']);
-  }
-
-  getToken(): string | null {
-    if (!this.isBrowser()) return null;
-    return localStorage.getItem(this.TOKEN_KEY);
+  }  getToken(): string | null {
+    if (!this.isBrowser()) {
+      console.log('⚠️ getToken() - No estamos en el browser');
+      return null;
+    }
+    const token = localStorage.getItem(this.TOKEN_KEY);
+    console.log('🔍 getToken() llamado');
+    console.log('  - Clave buscada:', this.TOKEN_KEY);
+    console.log('  - Token encontrado:', token ? `SÍ (${token.substring(0, 20)}...)` : 'NO (null)');
+    return token;
   }
 
   getRefreshToken(): string | null {
@@ -85,15 +107,9 @@ export class AuthService {
   isAuthenticated(): boolean {
     if (!this.isBrowser()) return false;
     
-    const token = this.getToken();
-    if (!token) return false;
-    
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.exp > Date.now() / 1000;
-    } catch {
-      return false;
-    }
+    const token = localStorage.getItem(this.TOKEN_KEY);
+    // Django Token Authentication: el token es una cadena simple, no JWT
+    return !!token && token.length > 0;
   }
 
   getCurrentUser(): User | null {
