@@ -1,10 +1,8 @@
 from django.utils.deprecation import MiddlewareMixin
 from django.contrib.auth.models import AnonymousUser
-import threading
 from threading import local
 
-# Variable local para almacenar el usuario actual
-_thread_local = local()
+_thread_locals = local()
 
 class CurrentUserMiddleware(MiddlewareMixin):
     """
@@ -29,8 +27,8 @@ def get_current_user():
     """
     Función para obtener el usuario actual desde cualquier parte del código
     """
-    return getattr(_thread_local, 'user', AnonymousUser())
+    return getattr(_thread_locals, 'user', AnonymousUser())
 
 def set_current_user(user):
     """Establecer el usuario actual en el thread local"""
-    _thread_local.user = user
+    _thread_locals.user = user
