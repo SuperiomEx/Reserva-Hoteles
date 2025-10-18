@@ -43,7 +43,7 @@ class HuespedViewSet(viewsets.ModelViewSet):
     """ViewSet para gestión de huéspedes"""
     queryset = Huesped.objects.all()
     serializer_class = HuespedSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]  # Temporalmente permitir sin auth
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['sexo', 'activo', 'nacionalidad']
     search_fields = ['nombres', 'apellidos', 'numero_identidad', 'correo_electronico']
