@@ -76,10 +76,6 @@ export interface ReservacionFilter {
 }
 
 export interface DashboardData {
-reservaciones_recientes: any;
-ocupacion_promedio: any;
-habitaciones_disponibles: any;
-reservaciones_activas: any;
   habitaciones: {
     total: number;
     disponibles: number;
@@ -101,5 +97,21 @@ reservaciones_activas: any;
     nombre: string;
     total_habitaciones: number;
     ocupadas: number;
+  }>;
+  reservaciones_recientes: Array<{
+    id: number;
+    huesped_detalle?: {
+      nombres: string;
+      apellidos: string;
+    };
+    habitacion_detalle?: {
+      numero_habitacion: string;
+    };
+    habitacion?: string;
+    fecha_llegada: string;
+    fecha_salida: string;
+    estado: string;
+    precio_total?: number;
+    precio?: number;
   }>;
 }
