@@ -8,15 +8,21 @@ export const authGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
   const platformId = inject(PLATFORM_ID);
 
-
+  // En el servidor, permitir el acceso (se manejará en el cliente)
   if (!isPlatformBrowser(platformId)) {
     return true;
   }
 
-  if (authService.isAuthenticated()) {
+  const token = authService.getToken();
+  console.log('🔒 AuthGuard - token exists:', !!token); // DEBUG
+  console.log('🔒 AuthGuard - trying to access:', state.url); // DEBUG
+
+  if (token) {
+    console.log('🔒 AuthGuard - access granted'); // DEBUG
     return true;
   }
 
+  console.log('🔒 AuthGuard - redirecting to login'); // DEBUG
   router.navigate(['/login']);
   return false;
 };
