@@ -54,21 +54,30 @@ export class LoginComponent implements OnInit {
       username: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
-  }
-
-  onSubmit(): void {
+  }  onSubmit(): void {
     if (this.loginForm.valid) {
       this.loading = true;
-      const loginData: LoginRequest = this.loginForm.value;
-
-      this.authService.login(loginData).subscribe({
+      const loginData: LoginRequest = this.loginForm.value;      this.authService.login(loginData).subscribe({
         next: (response: any) => {
           this.loading = false;
+          console.log('✅ Login exitoso, navegando al dashboard...');
+          
           this.snackBar.open('Inicio de sesión exitoso', 'Cerrar', {
-            duration: 3000,
+            duration: 2000,
             panelClass: ['success-snackbar']
           });
-          this.router.navigate(['/dashboard']);
+          
+          // Esperar un tick para que localStorage se actualice
+          setTimeout(() => {
+            console.log('🔑 Token guardado:', !!this.authService.getToken());
+            this.router.navigate(['/dashboard']).then(success => {
+              console.log('✅ Navegación completada:', success);
+              if (!success) {
+                console.error('❌ Navegación falló - forzando recarga');
+                window.location.href = '/dashboard';
+              }
+            });
+          }, 100);
         },
         error: (error: any) => {
           this.loading = false;
