@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import TipoHabitacion, Huesped, Habitacion, Reservacion
+from .models import TipoHabitacion, Huesped, Habitacion, Reservacion, Servicio, Empleado, Departamento, Dependiente, ReservacionServicio
 
 @admin.register(TipoHabitacion)
 class TipoHabitacionAdmin(admin.ModelAdmin):
@@ -89,3 +89,23 @@ class ReservacionAdmin(admin.ModelAdmin):
             obj.created_by = request.user
         obj.updated_by = request.user
         super().save_model(request, obj, form, change)
+
+@admin.register(Servicio)
+class ServicioAdmin(admin.ModelAdmin):
+    list_display = ['nombre', 'precio', 'activo']
+
+@admin.register(Empleado)
+class EmpleadoAdmin(admin.ModelAdmin):
+    list_display = ['nombres', 'apellidos', 'cargo', 'departamento']
+
+@admin.register(Departamento)
+class DepartamentoAdmin(admin.ModelAdmin):
+    list_display = ['nombre', 'jefe', 'presupuesto']
+
+@admin.register(Dependiente)
+class DependienteAdmin(admin.ModelAdmin):
+    list_display = ['nombre', 'empleado', 'parentesco']
+
+@admin.register(ReservacionServicio)
+class ReservacionServicioAdmin(admin.ModelAdmin):
+    list_display = ['reservacion', 'servicio', 'cantidad', 'precio_unitario']
