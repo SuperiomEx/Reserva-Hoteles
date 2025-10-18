@@ -24,4 +24,6 @@ urlpatterns = [
     path('reportes/dashboard/', views.DashboardStatsView.as_view(), name='dashboard_stats'),
     path('reportes/reservaciones-activas-pdf/', views.ExportReservacionesPDFView.as_view(), name='export_reservaciones_pdf'),
     path('reportes/reservaciones-activas-excel/', ExportReservacionesExcelView.as_view(), name='export_reservaciones_excel'),
+    path('reportes/', views.ReportesViewSet.as_view(), name='reportes'),
+    path('reportes/export/<str:format_type>/', views.ExportReportsView.as_view(), name='export-reports'),
 ]
