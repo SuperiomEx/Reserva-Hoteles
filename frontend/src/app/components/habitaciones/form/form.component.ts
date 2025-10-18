@@ -41,7 +41,6 @@ export class FormComponent implements OnInit {
   loading = false;
   isEdit = false;
   habitacionId: number | null = null;
-
   constructor(
     private fb: FormBuilder,
     private habitacionService: HabitacionService,
@@ -52,9 +51,7 @@ export class FormComponent implements OnInit {
     this.habitacionForm = this.fb.group({
       numero_habitacion: ['', Validators.required],
       tipo_habitacion: ['', Validators.required],
-      estado: ['disponible', Validators.required],
-      descripcion: [''],
-      disponible: [true]
+      descripcion: ['']
     });
   }
 
@@ -68,28 +65,27 @@ export class FormComponent implements OnInit {
       this.loadHabitacion(this.habitacionId);
     }
   }
-
   loadTiposHabitacion(): void {
     this.habitacionService.getTipos().subscribe({
-      next: (tipos: TipoHabitacion[]) => {
-        this.tiposHabitacion = tipos;
+      next: (tipos: any) => {
+        // Manejar si la respuesta es un array directo o un objeto con results
+        this.tiposHabitacion = Array.isArray(tipos) ? tipos : (tipos.results || []);
+        console.log('✅ Tipos cargados:', this.tiposHabitacion);
       },
       error: (error: any) => {
         console.error('Error loading tipos:', error);
+        this.tiposHabitacion = [];
         this.snackBar.open('Error al cargar tipos de habitación', 'Cerrar', { duration: 3000 });
       }
     });
   }
-
   loadHabitacion(id: number): void {
     this.habitacionService.getById(id).subscribe({
       next: (habitacion: any) => {
         this.habitacionForm.patchValue({
           numero_habitacion: habitacion.numero_habitacion,
           tipo_habitacion: typeof habitacion.tipo_habitacion === 'object' ? habitacion.tipo_habitacion.id : habitacion.tipo_habitacion,
-          estado: habitacion.estado,
-          descripcion: habitacion.descripcion,
-          disponible: true
+          descripcion: habitacion.descripcion
         });
       },
       error: (error: any) => {
@@ -98,12 +94,16 @@ export class FormComponent implements OnInit {
         this.router.navigate(['/habitaciones']);
       }
     });
-  }
-
-  onSubmit(): void {
+  }onSubmit(): void {
     if (this.habitacionForm.valid) {
       this.loading = true;
-      const formData = this.habitacionForm.value;
+      const formData = {
+        numero_habitacion: this.habitacionForm.value.numero_habitacion,
+        tipo_habitacion: parseInt(this.habitacionForm.value.tipo_habitacion),
+        descripcion: this.habitacionForm.value.descripcion || ''
+      };
+
+      console.log('📤 Enviando datos:', formData);
 
       const operation = this.isEdit && this.habitacionId
         ? this.habitacionService.update(this.habitacionId, formData)
@@ -121,14 +121,33 @@ export class FormComponent implements OnInit {
         },
         error: (error: any) => {
           this.loading = false;
-          console.error('Error saving habitacion:', error);
-          const message = this.isEdit ? 'Error al actualizar habitación' : 'Error al crear habitación';
+          console.error('❌ Error saving habitacion:', error);
+          console.error('❌ Error details:', error.error);
+          let message = this.isEdit ? 'Error al actualizar habitación' : 'Error al crear habitación';
+          
+          // Mostrar errores específicos del backend
+          if (error.error) {
+            const errors = Object.entries(error.error)
+              .map(([key, value]) => `${key}: ${value}`)
+              .join(', ');
+            message = errors || message;
+          }
+          
           this.snackBar.open(message, 'Cerrar', { 
             duration: 5000,
             panelClass: ['error-snackbar']
           });
         }
       });
+    } else {
+      console.warn('⚠️ Formulario inválido:', this.habitacionForm.errors);
+      Object.keys(this.habitacionForm.controls).forEach(key => {
+        const control = this.habitacionForm.get(key);
+        if (control?.invalid) {
+          console.warn(`  - ${key}:`, control.errors);
+        }
+      });
+      this.snackBar.open('Por favor complete todos los campos requeridos', 'Cerrar', { duration: 3000 });
     }
   }
 }

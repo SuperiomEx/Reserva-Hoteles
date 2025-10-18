@@ -1,9 +1,9 @@
 <div class="layout-container">
   <app-navbar></app-navbar>
-  
+
   <div class="main-content">
     <app-sidebar></app-sidebar>
-    
+
     <div class="content-area">
       <div class="page-header">
         <h1>{{isEdit ? 'Editar' : 'Crear'}} Habitación</h1>
@@ -17,7 +17,7 @@
         <mat-card-header>
           <mat-card-title>Información de la Habitación</mat-card-title>
         </mat-card-header>
-        
+
         <mat-card-content>
           <form [formGroup]="habitacionForm" (ngSubmit)="onSubmit()">
             <div class="form-row">
@@ -42,32 +42,10 @@
               </mat-form-field>
             </div>
 
-            <div class="form-row">
-              <mat-form-field class="form-field">
-                <mat-label>Estado</mat-label>
-                <mat-select formControlName="estado">
-                  <mat-option value="disponible">Disponible</mat-option>
-                  <mat-option value="ocupada">Ocupada</mat-option>
-                  <mat-option value="mantenimiento">Mantenimiento</mat-option>
-                  <mat-option value="limpieza">Limpieza</mat-option>
-                </mat-select>
-                <mat-error *ngIf="habitacionForm.get('estado')?.hasError('required')">
-                  El estado es requerido
-                </mat-error>
-              </mat-form-field>
-
-              <mat-form-field class="form-field">
-                <mat-label>¿Disponible para reserva?</mat-label>
-                <mat-select formControlName="disponible">
-                  <mat-option [value]="true">Sí</mat-option>
-                  <mat-option [value]="false">No</mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
-
             <mat-form-field class="form-field full-width">
               <mat-label>Descripción</mat-label>
-              <textarea matInput formControlName="descripcion" rows="4" placeholder="Descripción de la habitación"></textarea>
+              <textarea matInput formControlName="descripcion" rows="4"
+                placeholder="Descripción de la habitación"></textarea>
             </mat-form-field>
 
             <div class="form-actions">
